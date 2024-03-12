@@ -1,0 +1,479 @@
+{
+  "name": "DigiCert CA Connector",
+  "description": "Connector for issuing and importing certificates from DigiCert CA",
+  "pluginType": "CA",
+  "workTypes": [
+    "CERTIFICATE_IMPORT",
+    "ISSUANCE"
+  ],
+  "domainSchema": {
+    "connection": {
+      "type": "object",
+      "properties": {
+        "configuration": {
+          "type": "object",
+          "properties": {
+            "serverUrl": {
+              "type": "string",
+              "x-labelLocalizationKey": "serverUrl.label",
+              "x-rank": 0
+            }
+          },
+          "required": [
+            "serverUrl"
+          ]
+        },
+        "credentials": {
+          "type": "object",
+          "properties": {
+            "apiKey": {
+              "type": "string",
+              "description": "apiKey.description",
+              "x-controlOptions": {
+                "password": "true",
+                "hidePasswordLabel": "password.hidePassword",
+                "showPasswordLabel": "password.showPassword"
+              },
+              "x-labelLocalizationKey": "apiKey.label",
+              "x-rank": 1
+            }
+          },
+          "required": [
+            "apiKey"
+          ]
+        }
+      },
+      "required": [
+        "configuration",
+        "credentials"
+      ]
+    },
+    "productOption": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SSL",
+              "CODE_SIGN"
+            ],
+            "default": "SSL"
+          }
+        },
+        "productDetails": {
+          "type": "objects",
+          "properties": {
+            "hashAlgorithms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "nameId": {
+              "type": "string"
+            },
+            "certificateType": {
+              "type": "string"
+            },
+            "allowAutoRenew": {
+              "type": "boolean"
+            },
+            "organizationIds": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "name",
+        "types"
+      ]
+    },
+    "product": {
+      "type": "object",
+      "properties": {
+        "organizationId": {
+          "type": "integer",
+          "x-labelLocalizationKey": "organizationId.label",
+          "x-rank": 0
+        },
+        "hashAlgorithm": {
+          "type": "string",
+          "x-dynamic-values": "$.hashAlgorithms",
+          "x-labelLocalizationKey": "hashAlgorithm.label",
+          "x-rank": 1
+        },
+        "nameId": {
+          "type": "string",
+          "x-dynamic-values": "$.nameId",
+          "x-labelLocalizationKey": "nameId.label",
+          "x-rank": 2
+        }
+      }
+    },
+    "orderDetails": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "PROCESSING",
+            "COMPLETED",
+            "FAILED"
+          ],
+          "default": "PENDING"
+        },
+        "certificateId": {
+          "type": "string"
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "status"
+      ]
+    },
+    "certificateDetails": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "REQUESTED",
+            "ISSUED",
+            "FAILED"
+          ],
+          "default": "PENDING"
+        },
+        "errorMessage": {
+          "type": "string"
+        },
+        "certificate": {
+          "type": "string"
+        },
+        "chain": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "status"
+      ]
+    },
+    "importOption": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "settings": {
+          "type": "objects",
+          "properties": {
+            "nameId": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "importConfiguration": {
+      "type": "object",
+      "properties": {
+        "includeExpiredCertificates": {
+          "type": "boolean",
+          "x-labelLocalizationKey": "",
+          "x-controlOptions": {
+            "toggledLabel": "includeExpiredCertificates.label",
+            "untoggledLabel": "includeExpiredCertificates.label"
+          },
+          "x-rank": 1
+        }
+      }
+    }
+  },
+  "localizationResources": {
+    "en": {
+      "serverUrl": {
+        "label": "Server URL"
+      },
+      "apiKey": {
+        "label": "API Key",
+        "description": "API key used to authenticate against the Certificate Authority"
+      },
+      "organizationId": {
+        "label": "Organizations"
+      },
+      "hashAlgorithm": {
+        "label": "Signature Hash"
+      },
+      "nameId": {
+        "label": "Name ID"
+      },
+      "autoRenew": {
+        "label": "Allow Auto Renew"
+      },
+      "includeRevokedCertificates": {
+        "label": "Include revoked certificates"
+      },
+      "includeExpiredCertificates": {
+        "label": "Include expired certificates"
+      }
+    }
+  },
+  "hooks": {
+    "mapping": {
+      "testConnection": {
+        "path": "/v1/testconnection",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "result": {
+              "type": "string",
+              "enum": [
+                "SUCCESS",
+                "FAILED"
+              ],
+              "default": "FAILED"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "result"
+          ]
+        }
+      },
+      "getOptions": {
+        "path": "/v1/getoptions",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "productOptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/domainSchema/productOption"
+              }
+            }
+          }
+        }
+      },
+      "requestCertificate": {
+        "path": "/v1/requestcertificate",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            },
+            "validitySeconds": {
+              "type": "int"
+            },
+            "productOptionName": {
+              "type": "string"
+            },
+            "product": {
+              "$ref": "#/domainSchema/product"
+            },
+            "pkcs10Request": {
+              "type": "string"
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "orderDetails": {
+              "$ref": "#/domainSchema/orderDetails"
+            },
+            "certificateDetails": {
+              "$ref": "#/domainSchema/certificateDetails"
+            }
+          }
+        }
+      },
+      "checkOrder": {
+        "path": "/v1/checkorder",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "response": {
+          "$ref": "#/domainSchema/orderDetails"
+        }
+      },
+      "checkCertificate": {
+        "path": "/v1/checkcertificate",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "response": {
+          "$ref": "#/domainSchema/certificateDetails"
+        }
+      },
+      "validateProduct": {
+        "path": "/v1/validateproduct",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            },
+            "name": {
+              "type": "string"
+            },
+            "product": {
+              "$ref": "#/domainSchema/product"
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "attributeName": {
+                    "type": "string"
+                  },
+                  "attributeValue": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "importCertificates": {
+        "path": "/v1/importcertificates",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            },
+            "option": {
+              "$ref": "#/domainSchema/importOption"
+            },
+            "configuration": {
+              "$ref": "#/domainSchema/importConfiguration"
+            },
+            "lastProcessedCertificateId": {
+              "type": "string",
+              "default": "0"
+            },
+            "batchSize": {
+              "type": "int"
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "UNCOMPLETED",
+                "COMPLETED"
+              ]
+            },
+            "lastProcessedCertificateId": {
+              "type": "string"
+            },
+            "certificates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "certificate": {
+                    "type": "string"
+                  },
+                  "chain": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "certificate"
+                ]
+              }
+            }
+          },
+          "required": [
+            "status",
+            "lastProcessedCertificateId"
+          ]
+        }
+      }
+    },
+    "requestConverters": [
+      "arguments-decrypter"
+    ]
+  }
+}
