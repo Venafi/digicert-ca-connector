@@ -87,7 +87,7 @@ func NewCertificateService() *Certificate {
 }
 
 // RequestCertificate will request certificate from a Certificate Authority
-func (cs *Certificate) RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int) (*domain.CertificateDetails, *domain.OrderDetails, error) {
+func (cs *Certificate) RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int, productDetails *domain.ProductDetails) (*domain.CertificateDetails, *domain.OrderDetails, error) {
 
 	pemBlock, _ := pem.Decode([]byte(pkcs10Request))
 	csr, err := x509.ParseCertificateRequest(pemBlock.Bytes)
@@ -121,10 +121,11 @@ func (cs *Certificate) RequestCertificate(connection domain.Connection, pkcs10Re
 		},
 		CustomExpirationDate: time.Now().Add(time.Second * time.Duration(validitySeconds)).Format(digicertDateFormat),
 	}
-	resp, err := executeRequest(connection, requestBody, fmt.Sprintf(orderCertificateUri, product.NameID))
+
+	resp, err := executeRequest(connection, requestBody, fmt.Sprintf(orderCertificateUri, productDetails.NameID))
 	if err != nil {
 		zap.L().Error(fmt.Sprintf("failed to request certificate from DigiCert CA using product name id: '%s'",
-			product.NameID), zap.Error(err))
+			productDetails.NameID), zap.Error(err))
 		return &domain.CertificateDetails{
 			Status:       domain.CertificateStatusFailed,
 			ErrorMessage: fmt.Sprintf("failed to request certificate from DigiCert CA server: %s", err.Error()),

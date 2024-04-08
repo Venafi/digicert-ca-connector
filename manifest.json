@@ -66,36 +66,39 @@
           }
         },
         "productDetails": {
-          "type": "objects",
-          "properties": {
-            "hashAlgorithms": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "nameId": {
-              "type": "string"
-            },
-            "certificateType": {
-              "type": "string"
-            },
-            "allowAutoRenew": {
-              "type": "boolean"
-            },
-            "organizationIds": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          }
+          "$ref": "#/domainSchema/productDetails"
         }
       },
       "required": [
         "name",
         "types"
       ]
+    },
+    "productDetails": {
+      "type": "object",
+      "properties": {
+        "hashAlgorithms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nameId": {
+          "type": "string"
+        },
+        "certificateType": {
+          "type": "string"
+        },
+        "allowAutoRenew": {
+          "type": "boolean"
+        },
+        "organizationIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
     },
     "product": {
       "type": "object",
@@ -110,12 +113,6 @@
           "x-dynamic-values": "$.hashAlgorithms",
           "x-labelLocalizationKey": "hashAlgorithm.label",
           "x-rank": 1
-        },
-        "nameId": {
-          "type": "string",
-          "x-dynamic-values": "$.nameId",
-          "x-labelLocalizationKey": "nameId.label",
-          "x-rank": 2
         }
       }
     },
@@ -320,6 +317,9 @@
             },
             "pkcs10Request": {
               "type": "string"
+            },
+            "productDetails": {
+              "$ref": "#/domainSchema/productDetails"
             }
           }
         },
