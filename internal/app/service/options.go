@@ -143,12 +143,6 @@ func (cs *Options) ValidateProduct(connection domain.Connection, name string, pr
 					break
 				}
 			}
-			if option.Details.NameID != product.NameID {
-				errors = append(errors, domain.ProductError{
-					AttributeName:  "nameId",
-					AttributeValue: product.NameID,
-				})
-			}
 			orgExist := false
 			for _, org := range option.Details.Organizations {
 				if org == product.OrganizationID {

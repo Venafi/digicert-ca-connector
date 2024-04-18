@@ -17,7 +17,7 @@ type OptionsService interface {
 
 // CertificateService ...
 type CertificateService interface {
-	RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int) (*domain.CertificateDetails, *domain.OrderDetails, error)
+	RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int, productDetails *domain.ProductDetails) (*domain.CertificateDetails, *domain.OrderDetails, error)
 	CheckOrder(connection domain.Connection, id string) (*domain.OrderDetails, error)
 	CheckCertificate(connection domain.Connection, id string) (*domain.CertificateDetails, error)
 	RetrieveCertificates(connection domain.Connection, option domain.ImportOption, configuration domain.ImportConfiguration, startCursor string, batchSize int) (*domain.ImportDetails, error)
