@@ -21,6 +21,7 @@ type CertificateService interface {
 	CheckOrder(connection domain.Connection, id string) (*domain.OrderDetails, error)
 	CheckCertificate(connection domain.Connection, id string) (*domain.CertificateDetails, error)
 	RetrieveCertificates(connection domain.Connection, option domain.ImportOption, configuration domain.ImportConfiguration, startCursor string, batchSize int) (*domain.ImportDetails, error)
+	RevokeCertificate(connection domain.Connection, serialNumber string, reason int) (*domain.RevocationDetails, error)
 }
 
 // WebhookService ...

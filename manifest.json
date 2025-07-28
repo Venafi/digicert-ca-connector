@@ -213,6 +213,37 @@
           "x-rank": 1
         }
       }
+    },
+    "certificateRevocationData": {
+      "type": "object",
+      "properties": {
+        "serialNumber": {
+          "type": "string"
+        },
+        "caCertificateIdentifier": {
+          "type": "string"
+        },
+        "caOrderIdentifier": {
+          "type": "string"
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "issuerDN": {
+          "type": "string"
+        },
+        "certificateContent": {
+          "type": "string"
+        }
+      },
+      "anyOf": [
+        { "required": ["serialNumber"] },
+        { "required": ["caCertificateIdentifier"] },
+        { "required": ["caOrderIdentifier"] },
+        { "required": ["fingerprint"] },
+        { "required": ["issuerDN"] },
+        { "required": ["certificateContent"] }
+      ]
     }
   },
   "localizationResources": {
@@ -468,6 +499,48 @@
           "required": [
             "status",
             "lastProcessedCertificateId"
+          ]
+        }
+      },
+      "revokeCertificate": {
+        "path": "/v1/revokecertificate",
+        "request": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "$ref": "#/domainSchema/connection"
+            },
+            "certificateRevocationData": {
+              "$ref": "#/domainSchema/certificateRevocationData"
+            },
+            "reason": {
+              "type": "int",
+              "maximum": 10,
+              "minimum": 0
+            }
+          },
+          "required": [
+            "connection",
+            "certificateRevocationData",
+            "reason"
+          ]
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "revocationStatus": {
+              "type": "string",
+              "enum": [
+                "SUBMITTED",
+                "FAILED"
+              ]
+            },
+            "errorMessage": {
+              "type":"string"
+            }
+          },
+          "required": [
+            "revocationStatus"
           ]
         }
       }

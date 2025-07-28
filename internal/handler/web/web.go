@@ -26,6 +26,7 @@ type WebhookService interface {
 	HandleCheckOrder(c echo.Context) error
 	HandleCheckCertificate(c echo.Context) error
 	HandleImportCertificates(c echo.Context) error
+	HandleRevokeCertificate(c echo.Context) error
 }
 
 // ConfigureHTTPServers creates an HTTP server with standard middleware and a system HTTP server with health and metrics endpoints
@@ -68,6 +69,7 @@ func RegisterHandlers(e *echo.Echo, whService WebhookService) error {
 	g.POST("/checkorder", whService.HandleCheckOrder)
 	g.POST("/checkcertificate", whService.HandleCheckCertificate)
 	g.POST("/importcertificates", whService.HandleImportCertificates)
+	g.POST("/revokecertificate", whService.HandleRevokeCertificate)
 
 	return nil
 }

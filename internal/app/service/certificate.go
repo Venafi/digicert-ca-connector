@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"time"
@@ -18,6 +19,7 @@ const (
 	orderCertificateUri                     = "/order/certificate/%s"
 	downloadCertificateUri                  = "/certificate/%s/download/format/pem_all"
 	retrieveCertificatesUri                 = "/order/certificate?%sfilters[status]=issued&limit=%d&offset=%s&sort=order_id"
+	revokeCertificateUri                    = "/certificate/%s/revoke"
 	retrieveCertificatesProductNameIdFilter = "filters[product_name_id]=%s&"
 	digicertDateFormat                      = "2006-01-02"
 )
@@ -43,6 +45,11 @@ type newCertificateRequestBody struct {
 	Certificate          certificate          `json:"certificate"`
 	Organization         digicertOrganization `json:"organization"`
 	CustomExpirationDate string               `json:"custom_expiration_date"`
+}
+
+type newRevokeCertificateRequestBody struct {
+	Reason  string `json:"reason"`
+	Comment string `json:"comment"`
 }
 
 type certificateChain struct {
@@ -75,6 +82,11 @@ type page struct {
 type digicertOrderDetailsSearchResponse struct {
 	Orders []digiCertOrderDetails `json:"orders"`
 	Page   page                   `json:"page"`
+}
+
+type digicertRevokeCertificateResponse struct {
+	ID     int    `json:"id"`
+	Status string `json:"status"`
 }
 
 // Certificate service responsible for certificate related operations
@@ -122,7 +134,7 @@ func (cs *Certificate) RequestCertificate(connection domain.Connection, pkcs10Re
 		CustomExpirationDate: time.Now().Add(time.Second * time.Duration(validitySeconds)).Format(digicertDateFormat),
 	}
 
-	resp, err := executeRequest(connection, requestBody, fmt.Sprintf(orderCertificateUri, productDetails.NameID))
+	resp, err := executeRequest(connection, requestBody, fmt.Sprintf(orderCertificateUri, productDetails.NameID), http.MethodPost)
 	if err != nil {
 		zap.L().Error(fmt.Sprintf("failed to request certificate from DigiCert CA using product name id: '%s'",
 			productDetails.NameID), zap.Error(err))
@@ -181,7 +193,7 @@ func (cs *Certificate) RequestCertificate(connection domain.Connection, pkcs10Re
 // CheckOrder will check order details for submitted certificate request
 func (cs *Certificate) CheckOrder(connection domain.Connection, id string) (*domain.OrderDetails, error) {
 
-	resp, err := executeRequest(connection, nil, fmt.Sprintf(orderCertificateUri, id))
+	resp, err := executeRequest(connection, nil, fmt.Sprintf(orderCertificateUri, id), http.MethodGet)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +224,7 @@ func (cs *Certificate) CheckOrder(connection domain.Connection, id string) (*dom
 // CheckCertificate will check certificate details for submitted certificate request
 func (cs *Certificate) CheckCertificate(connection domain.Connection, id string) (*domain.CertificateDetails, error) {
 
-	resp, err := executeRequest(connection, nil, fmt.Sprintf(downloadCertificateUri, id))
+	resp, err := executeRequest(connection, nil, fmt.Sprintf(downloadCertificateUri, id), http.MethodGet)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +254,7 @@ func (cs *Certificate) RetrieveCertificates(connection domain.Connection, import
 	if importOption.Settings.NameID != "" {
 		filters = fmt.Sprintf(retrieveCertificatesProductNameIdFilter, importOption.Settings.NameID)
 	}
-	resp, err := executeRequest(connection, nil, fmt.Sprintf(retrieveCertificatesUri, filters, batchSize, startCursor))
+	resp, err := executeRequest(connection, nil, fmt.Sprintf(retrieveCertificatesUri, filters, batchSize, startCursor), http.MethodGet)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +283,7 @@ func (cs *Certificate) RetrieveCertificates(connection domain.Connection, import
 			continue
 		}
 
-		resp, err = executeRequest(connection, nil, fmt.Sprintf("/certificate/%d/download/format/pem_all", order.Certificate.ID))
+		resp, err = executeRequest(connection, nil, fmt.Sprintf("/certificate/%d/download/format/pem_all", order.Certificate.ID), http.MethodGet)
 		if err != nil {
 			return nil, err
 		}
@@ -294,6 +306,48 @@ func (cs *Certificate) RetrieveCertificates(connection domain.Connection, import
 		ImportStatus:               status,
 		LastProcessedCertificateID: strconv.Itoa(lastOffset),
 		ImportCertificates:         certificates,
+	}, nil
+}
+
+func (cs *Certificate) RevokeCertificate(connection domain.Connection, serialNumber string, reasonCode int) (*domain.RevocationDetails, error) {
+	reason := revocationReasonCodeToString(reasonCode)
+	requestBody := newRevokeCertificateRequestBody{
+		Reason:  reason,
+		Comment: "",
+	}
+
+	resp, err := executeRequest(connection, requestBody, fmt.Sprintf(revokeCertificateUri, serialNumber), http.MethodPut)
+	if err != nil {
+		zap.L().Error(fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA using serial number: '%s'",
+			serialNumber), zap.Error(err))
+		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server: %s", err.Error())
+		return &domain.RevocationDetails{
+			Status:       domain.RevocationStatusFailed,
+			ErrorMessage: &errMessage,
+		}, nil
+	}
+
+	digicertResponse := digicertRevokeCertificateResponse{}
+	err = json.Unmarshal(resp.Body(), &digicertResponse)
+	if err != nil {
+		zap.L().Error("failed to unmarshal certificate revocation response.", zap.Error(err))
+		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server: %s", err.Error())
+		return &domain.RevocationDetails{
+			Status:       domain.RevocationStatusFailed,
+			ErrorMessage: &errMessage,
+		}, nil
+	}
+
+	if digicertResponse.Status != "submitted" {
+		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server: %s", err.Error())
+		return &domain.RevocationDetails{
+			Status:       domain.RevocationStatusFailed,
+			ErrorMessage: &errMessage,
+		}, nil
+	}
+
+	return &domain.RevocationDetails{
+		Status: domain.RevocationStatusSubmitted,
 	}, nil
 }
 
@@ -344,4 +398,20 @@ func parseCertificatePEM(certBytes []byte) ([]*x509.Certificate, error) {
 	}
 
 	return certs, nil
+}
+
+func revocationReasonCodeToString(reasonCode int) string {
+	switch reasonCode {
+	case 0:
+		return "unspecified"
+	case 1:
+		return "keyCompromise"
+	case 3:
+		return "affiliationChanged"
+	case 4:
+		return "superseded"
+	case 5:
+		return "cessationOfOperation"
+	}
+	return ""
 }

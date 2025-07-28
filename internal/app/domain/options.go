@@ -12,6 +12,7 @@ const (
 type Product struct {
 	OrganizationID int    `json:"organizationId"`
 	HashAlgorithm  string `json:"hashAlgorithm"`
+	NameID         string `json:"nameId"`
 }
 
 // ProductError represents attribute name and value for invalid product properties

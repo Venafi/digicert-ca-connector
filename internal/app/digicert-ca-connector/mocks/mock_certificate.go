@@ -32,9 +32,9 @@ func (m *MockCertificateService) EXPECT() *MockCertificateServiceMockRecorder {
 }
 
 // RequestCertificate mocks base method.
-func (m *MockCertificateService) RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int) (*domain.CertificateDetails, *domain.OrderDetails, error) {
+func (m *MockCertificateService) RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int, productDetails *domain.ProductDetails) (*domain.CertificateDetails, *domain.OrderDetails, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RequestCertificate", connection, pkcs10Request, product, productOptionName, validitySeconds)
+	ret := m.ctrl.Call(m, "RequestCertificate", connection, pkcs10Request, product, productOptionName, validitySeconds, productDetails)
 	ret0, _ := ret[0].(*domain.CertificateDetails)
 	ret1, _ := ret[1].(*domain.OrderDetails)
 	ret2, _ := ret[2].(error)
@@ -42,9 +42,9 @@ func (m *MockCertificateService) RequestCertificate(connection domain.Connection
 }
 
 // RequestCertificate indicates an expected call of MockCertificateService.
-func (mr *MockCertificateServiceMockRecorder) RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int) *gomock.Call {
+func (mr *MockCertificateServiceMockRecorder) RequestCertificate(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int, productDetails *domain.ProductDetails) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestCertificate", reflect.TypeOf((*MockCertificateService)(nil).RequestCertificate), connection, pkcs10Request, product, productOptionName, validitySeconds)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestCertificate", reflect.TypeOf((*MockCertificateService)(nil).RequestCertificate), connection, pkcs10Request, product, productOptionName, validitySeconds, productDetails)
 }
 
 // CheckOrder mocks base method.
@@ -90,4 +90,19 @@ func (m *MockCertificateService) RetrieveCertificates(connection domain.Connecti
 func (mr *MockCertificateServiceMockRecorder) RetrieveCertificates(connection domain.Connection, option domain.ImportOption, configuration domain.ImportConfiguration, startCursor string, batchSize int) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetrieveCertificates", reflect.TypeOf((*MockCertificateService)(nil).RetrieveCertificates), connection, option, configuration, startCursor, batchSize)
+}
+
+// RevokeCertificate mocks base method.
+func (m *MockCertificateService) RevokeCertificate(connection domain.Connection, serialNumber string, reasonCode int) (*domain.RevocationDetails, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RevokeCertificate", connection, serialNumber, reasonCode)
+	ret0, _ := ret[0].(*domain.RevocationDetails)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RevokeCertificate indicates an expected call of MockCertificateService.
+func (mr *MockCertificateServiceMockRecorder) RevokeCertificate(connection domain.Connection, serialNumber string, reasonCode int) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevokeCertificate", reflect.TypeOf((*MockCertificateService)(nil).RevokeCertificate), connection, serialNumber, reasonCode)
 }
