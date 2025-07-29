@@ -310,9 +310,8 @@ func (cs *Certificate) RetrieveCertificates(connection domain.Connection, import
 }
 
 func (cs *Certificate) RevokeCertificate(connection domain.Connection, serialNumber string, reasonCode int) (*domain.RevocationDetails, error) {
-	reason := revocationReasonCodeToString(reasonCode)
 	requestBody := newRevokeCertificateRequestBody{
-		Reason:  reason,
+		Reason:  revocationReasonCodeToString(reasonCode),
 		Comment: "",
 	}
 
@@ -320,7 +319,7 @@ func (cs *Certificate) RevokeCertificate(connection domain.Connection, serialNum
 	if err != nil {
 		zap.L().Error(fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA using serial number: '%s'",
 			serialNumber), zap.Error(err))
-		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server: %s", err.Error())
+		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server for certificate with serial number %s: %s", serialNumber, err.Error())
 		return &domain.RevocationDetails{
 			Status:       domain.RevocationStatusFailed,
 			ErrorMessage: &errMessage,
@@ -331,7 +330,7 @@ func (cs *Certificate) RevokeCertificate(connection domain.Connection, serialNum
 	err = json.Unmarshal(resp.Body(), &digicertResponse)
 	if err != nil {
 		zap.L().Error("failed to unmarshal certificate revocation response.", zap.Error(err))
-		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server: %s", err.Error())
+		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server for certificate with serial number %s: %s", serialNumber, err.Error())
 		return &domain.RevocationDetails{
 			Status:       domain.RevocationStatusFailed,
 			ErrorMessage: &errMessage,
@@ -339,7 +338,7 @@ func (cs *Certificate) RevokeCertificate(connection domain.Connection, serialNum
 	}
 
 	if digicertResponse.Status != "submitted" {
-		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server: %s", err.Error())
+		errMessage := fmt.Sprintf("failed to submit certificate revocation request to DigiCert CA server for certificate with serial number %s: %s", serialNumber, err.Error())
 		return &domain.RevocationDetails{
 			Status:       domain.RevocationStatusFailed,
 			ErrorMessage: &errMessage,
