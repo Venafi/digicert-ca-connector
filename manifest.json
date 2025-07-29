@@ -31,8 +31,8 @@
               "description": "apiKey.description",
               "x-controlOptions": {
                 "password": "true",
-                "hidePasswordLabel": "password.hidePassword",
-                "showPasswordLabel": "password.showPassword"
+                "hidePasswordLabel": "apiKey.hideApiKey",
+                "showPasswordLabel": "apiKey.showApiKey"
               },
               "x-labelLocalizationKey": "apiKey.label",
               "x-rank": 1
@@ -253,7 +253,9 @@
       },
       "apiKey": {
         "label": "API Key",
-        "description": "API key used to authenticate against the Certificate Authority"
+        "description": "API key used to authenticate against the Certificate Authority",
+        "showApiKey": "Show API key",
+        "hideApiKey": "Hide API key"
       },
       "organizationId": {
         "label": "Organizations"
