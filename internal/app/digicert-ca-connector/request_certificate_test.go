@@ -82,6 +82,13 @@ func TestHandleRequestCertificate(t *testing.T) {
 }
 
 func testRequestCertificate(t *testing.T, whService *WebhookService, mockCertificateService *mocks.MockCertificateService, e *echo.Echo, success bool, orderDetails bool) {
+	pd := domain.ProductDetails{
+		NameID:               productNameId,
+		Hashes:               []string{productHashAlgorithm},
+		DefaultHashAlgorithm: productHashAlgorithm,
+		Organizations:        []int{productOrganizationId},
+	}
+	pdJson, _ := json.Marshal(pd)
 	recorder, ctx := setupPost(e, requestCertificatePath, fmt.Sprintf(`{
 			"connection": {
 				"configuration": {
@@ -98,8 +105,9 @@ func testRequestCertificate(t *testing.T, whService *WebhookService, mockCertifi
                "organizationId": %d
            },
            "pkcs10Request": "%s",
-           "validitySeconds": %d
-		}`, serverURL, apiKey, productOptionName, productNameId, productHashAlgorithm, productOrganizationId, pkcs10Request, validitySeconds))
+           "validitySeconds": %d,
+           "productDetails": %s
+		}`, serverURL, apiKey, productOptionName, productNameId, productHashAlgorithm, productOrganizationId, pkcs10Request, validitySeconds, pdJson))
 
 	connection := buildConnection()
 	po := domain.Product{
@@ -109,7 +117,7 @@ func testRequestCertificate(t *testing.T, whService *WebhookService, mockCertifi
 	}
 	var expectedCertDetails domain.CertificateDetails
 	var expectedOrderDetails domain.OrderDetails
-	mockCertificateService.EXPECT().RequestCertificate(connection, pkcs10Request, po, productOptionName, validitySeconds).DoAndReturn(func(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int) (*domain.CertificateDetails, *domain.OrderDetails, error) {
+	mockCertificateService.EXPECT().RequestCertificate(connection, pkcs10Request, po, productOptionName, validitySeconds, &pd).DoAndReturn(func(connection domain.Connection, pkcs10Request string, product domain.Product, productOptionName string, validitySeconds int, productDetails *domain.ProductDetails) (*domain.CertificateDetails, *domain.OrderDetails, error) {
 		if success {
 			if orderDetails {
 				expectedOrderDetails.ID = "OrderID"

@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/venafi/digicert-ca-connector/internal/app/domain"
@@ -57,7 +58,7 @@ func NewOptionsService() *Options {
 // GetOptions will retrieve product and import options from Certificate Authority
 func (cs *Options) GetOptions(connection domain.Connection) ([]domain.ProductOption, []domain.ImportOption, error) {
 
-	resp, err := executeRequest(connection, nil, getOrganizationsUri)
+	resp, err := executeRequest(connection, nil, getOrganizationsUri, http.MethodGet)
 
 	if err != nil {
 		return nil, nil, err
@@ -75,7 +76,7 @@ func (cs *Options) GetOptions(connection domain.Connection) ([]domain.ProductOpt
 			activeOrganizations = append(activeOrganizations, org.ID)
 		}
 	}
-	resp, err = executeRequest(connection, nil, getProductUri)
+	resp, err = executeRequest(connection, nil, getProductUri, http.MethodGet)
 	if err != nil {
 		return nil, nil, err
 	}

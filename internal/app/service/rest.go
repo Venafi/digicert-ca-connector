@@ -12,14 +12,19 @@ import (
 // NewRestClient is a function that creates a resty client, to allow mocking and intercepting of HTTP requests
 var NewRestClient = resty.New
 
-func executeRequest(connection domain.Connection, requestBody any, uriPath string) (*resty.Response, error) {
+func executeRequest(connection domain.Connection, requestBody any, uriPath string, requestMethod string) (*resty.Response, error) {
 	request := NewRestClient().R().SetHeader("Content-Type", "application/json").SetHeader("X-DC-DEVKEY", connection.Credentials.ApiKey)
 	var resp *resty.Response
 	var err error
-	if requestBody != nil {
-		resp, err = request.SetBody(requestBody).Post(connection.Configuration.ServerURL + uriPath)
-	} else {
+	switch requestMethod {
+	case http.MethodGet:
 		resp, err = request.Get(connection.Configuration.ServerURL + uriPath)
+	case http.MethodPost:
+		resp, err = request.SetBody(requestBody).Post(connection.Configuration.ServerURL + uriPath)
+	case http.MethodPut:
+		resp, err = request.SetBody(requestBody).Put(connection.Configuration.ServerURL + uriPath)
+	default:
+		return nil, fmt.Errorf("unsupported HTTP request method")
 	}
 
 	if err != nil {

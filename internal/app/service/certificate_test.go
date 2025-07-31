@@ -141,7 +141,7 @@ func testCertificateRequest(t *testing.T, httpStatus int, orderDetails bool) {
 		OrganizationID: 1,
 		HashAlgorithm:  "sha256",
 		NameID:         "ssl_private_id",
-	}, productOptionName, 300)
+	}, productOptionName, 300, &domain.ProductDetails{NameID: "ssl_private_id"})
 	if httpStatus == http.StatusOK {
 		if orderDetails {
 			require.Equal(t, order.ID, "1234")
