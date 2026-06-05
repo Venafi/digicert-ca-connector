@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 
 	"github.com/venafi/digicert-ca-connector/internal/app/digicert-ca-connector/mocks"
 	"github.com/venafi/digicert-ca-connector/internal/app/domain"

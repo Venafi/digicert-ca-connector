@@ -12,10 +12,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-jose/go-jose/v4"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"gopkg.in/square/go-jose.v2"
 )
 
 // WebhookService interfaces for the connector operation functions
@@ -96,7 +96,17 @@ func addPayloadEncryptionMiddleware(g *echo.Group) {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "failed to read request body")
 			}
-			object, err := jose.ParseEncrypted(string(body))
+			object, err := jose.ParseEncrypted(
+				string(body),
+				[]jose.KeyAlgorithm{
+					jose.ED25519, jose.RSA1_5, jose.RSA_OAEP, jose.RSA_OAEP_256, jose.A128KW, jose.A192KW, jose.A256KW,
+					jose.DIRECT, jose.ECDH_ES, jose.ECDH_ES_A128KW, jose.ECDH_ES_A192KW, jose.ECDH_ES_A256KW, jose.A128GCMKW,
+					jose.A192GCMKW, jose.A256GCMKW, jose.PBES2_HS256_A128KW, jose.PBES2_HS384_A192KW, jose.PBES2_HS512_A256KW,
+				},
+				[]jose.ContentEncryption{
+					jose.A128CBC_HS256, jose.A192CBC_HS384, jose.A256CBC_HS512, jose.A128GCM, jose.A192GCM, jose.A256GCM,
+				},
+			)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "invalid encrypted payload")
 			}

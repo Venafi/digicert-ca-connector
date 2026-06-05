@@ -3,9 +3,8 @@ package mocks
 import (
 	"reflect"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/venafi/digicert-ca-connector/internal/app/domain"
+	"go.uber.org/mock/gomock"
 )
 
 // MockCertificateService is a mock of CertificateService interface.

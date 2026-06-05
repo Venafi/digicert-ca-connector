@@ -8,10 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/venafi/digicert-ca-connector/internal/app/digicert-ca-connector/mocks"
+	"go.uber.org/mock/gomock"
 
 	"github.com/venafi/digicert-ca-connector/internal/app/domain"
 )

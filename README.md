@@ -16,7 +16,7 @@ Before you start reviewing the source code for this sample connector, please fam
 The following software and minimum versions are required to build this sample connector and container image:
 - GNU Make version 3.81
 - `jq` version 1.6
-- go version 1.20
+- go version 1.25
 - Docker version 24.0.7
 - `golangci-lint` version 1.52.2
 

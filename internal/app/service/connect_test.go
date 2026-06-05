@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/golang/mock/gomock"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 
 	"github.com/venafi/digicert-ca-connector/internal/app/domain"
 )
