@@ -22,7 +22,7 @@ type ImportCertificatesRequest struct {
 // HandleImportCertificates will retrieve certificates available for import in TLSPC from Certificate Authority
 func (svc *WebhookService) HandleImportCertificates(c echo.Context) error {
 	req := ImportCertificatesRequest{}
-	if err := c.Bind(&req); err != nil {
+	if err := bindRequest(c, &req); err != nil {
 		zap.L().Error("invalid request, failed to unmarshal json", zap.Error(err))
 		return c.String(http.StatusBadRequest, fmt.Sprintf("failed to unmarshal json: %s", err.Error()))
 	}

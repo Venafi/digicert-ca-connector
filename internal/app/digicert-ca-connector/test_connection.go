@@ -32,7 +32,7 @@ type TestConnectionResponse struct {
 // HandleTestConnection will test connectivity to Certificate Authority
 func (svc *WebhookService) HandleTestConnection(c echo.Context) error {
 	req := TestConnectionRequest{}
-	if err := c.Bind(&req); err != nil {
+	if err := bindRequest(c, &req); err != nil {
 		zap.L().Error("invalid request, failed to unmarshal json", zap.Error(err))
 		return c.String(http.StatusBadRequest, fmt.Sprintf("failed to unmarshal json: %s", err.Error()))
 	}
