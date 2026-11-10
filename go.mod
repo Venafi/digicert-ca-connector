@@ -3,7 +3,7 @@ module github.com/venafi/digicert-ca-connector
 go 1.27.3
 
 require (
-	github.com/go-jose/go-jose/v4 v4.1.4
+	github.com/go-jose/go-jose/v4 v4.1.9
 	github.com/go-resty/resty/v2 v2.11.0
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/labstack/echo/v4 v4.16.3
