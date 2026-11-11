@@ -25,7 +25,7 @@ type ValidateProductResponse struct {
 // HandleValidateProduct will validate specific product attributes against Certificate Authority
 func (svc *WebhookService) HandleValidateProduct(c echo.Context) error {
 	req := ValidateProductRequest{}
-	if err := c.Bind(&req); err != nil {
+	if err := bindRequest(c, &req); err != nil {
 		zap.L().Error("invalid request, failed to unmarshal json", zap.Error(err))
 		return c.String(http.StatusBadRequest, fmt.Sprintf("failed to unmarshal json: %s", err.Error()))
 	}

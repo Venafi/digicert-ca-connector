@@ -29,7 +29,7 @@ type RequestCertificateResponse struct {
 // HandleRequestCertificate will submit certificate request to Certificate Authority
 func (svc *WebhookService) HandleRequestCertificate(c echo.Context) error {
 	req := RequestCertificateRequest{}
-	if err := c.Bind(&req); err != nil {
+	if err := bindRequest(c, &req); err != nil {
 		zap.L().Error("invalid request, failed to unmarshal json", zap.Error(err))
 		return c.String(http.StatusBadRequest, fmt.Sprintf("failed to unmarshal json: %s", err.Error()))
 	}

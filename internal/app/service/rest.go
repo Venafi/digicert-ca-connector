@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -92,7 +93,7 @@ func executeRequest(connection domain.Connection, requestBody any, uriPath strin
 	}
 
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated && resp.StatusCode() != http.StatusAccepted {
-		return nil, fmt.Errorf(string(resp.Body()))
+		return nil, errors.New(string(resp.Body()))
 	}
 	return resp, nil
 }

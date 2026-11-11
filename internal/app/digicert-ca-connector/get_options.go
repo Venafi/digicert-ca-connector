@@ -24,7 +24,7 @@ type GetOptionsResponse struct {
 // HandleGetOptions will retrieve product and import options from Certificate Authority
 func (svc *WebhookService) HandleGetOptions(c echo.Context) error {
 	req := GetOptionsRequest{}
-	if err := c.Bind(&req); err != nil {
+	if err := bindRequest(c, &req); err != nil {
 		zap.L().Error("invalid request, failed to unmarshal json", zap.Error(err))
 		return c.String(http.StatusBadRequest, fmt.Sprintf("failed to unmarshal json: %s", err.Error()))
 	}
